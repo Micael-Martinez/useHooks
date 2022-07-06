@@ -1,5 +1,6 @@
 import React, {useState, useEffect} from "react";
-import axios from "axios";
+import { createNote } from "../services/notes/createNote";
+import { getAllNotes } from "../services/notes/getAllNotes";
 
 const Note = ({id, title, body}) => {
     return(
@@ -19,15 +20,11 @@ export default function App() {
 
     useEffect(() => {
         setLoading(true);
-        axios
-            .get("https://jsonplaceholder.typicode.com/posts")
-            .then(response => {
-                console.log("seteando data de la API a setNotes")
-                console.log(response.data)
-                const {data} = response
-                setNotes(data)
-                setLoading(false)
-            })
+
+        getAllNotes().then(notes => {
+            setNotes(notes)
+            setLoading(false)
+        })
     }, [])
 
     const handleChange = (event) => {
@@ -41,10 +38,19 @@ export default function App() {
             id: notes.length + 1,
             title: "Se agrego recien",
             body: newNote,
+            userId: 1,
         }
 
+        // createNote(noteToAddToState)
+        //     .then(newNote => {
+        //         console.log(newNote)
+        //         setNotes(prevNotes => prevNotes.concat(newNote))
+
+        //     })
+
+
         setNotes([...notes, noteToAddToState])
-        setNewNote('')
+        setNewNote("")
 
         console.log(notes);
     }
@@ -56,17 +62,20 @@ export default function App() {
 
     return(
         <div>
-            <h1>Notes</h1>
-            {loading ? 'Cargando...' : ''}
-            {notes.map(note => (
-                <Note key={note.id} {...note} />
-            ))}
-
             <h1>Add new Note:</h1>
                 <form onSubmit={handleSubmit}>
                     <input onChange={handleChange} value={newNote} type="text" />
                     <button>Crear Nota</button>
                 </form>
+
+
+            <h1>Notes</h1>
+            {loading ? 'Cargando...' : ''}
+            {notes.map(note => (
+                <Note key={note.id} {...note} />
+            )).reverse()}
+
+
         </div>
         )
     }
